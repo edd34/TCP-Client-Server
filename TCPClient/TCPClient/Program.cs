@@ -1,33 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
+﻿/*       Client Program      */
+
+using System;
 using System.IO;
-using System.Linq;
-using System.Net.Sockets;
+using System.Net;
 using System.Text;
-using System.Threading.Tasks;
+using System.Net.Sockets;
 
-namespace TCPClient
-{
-    class Program
-    {
-        [STAThread]
-        static void Main(string[] args)
-        {
-            Console.Title = "Client";
 
-            TcpClient client = new TcpClient();
-            Console.WriteLine("Connecting...");
+public class clnt {
 
-            client.Connect("127.0.0.1", 8080);
+    public static void Main() {
+
+        try {
+            TcpClient tcpclnt = new TcpClient();
+            Console.WriteLine("Connecting.....");
+
+            //tcpclnt.Connect("100.68.99.8",8001);
+            tcpclnt.Connect("100.68.99.8",8080);
+            // use the ipaddress as in the server program
 
             Console.WriteLine("Connected");
+            Console.Write("Enter the string to be transmitted : ");
 
-            NetworkStream netstream = client.GetStream();
-            StreamWriter streamWriter = new StreamWriter(netstream);
-            StreamReader streamReader = new StreamReader(netstream);
+            String str=Console.ReadLine();
+            Stream stm = tcpclnt.GetStream();
 
-            Console.Read();
+            ASCIIEncoding asen= new ASCIIEncoding();
+            byte[] ba=asen.GetBytes(str);
+            Console.WriteLine("Transmitting.....");
 
+            stm.Write(ba,0,ba.Length);
+
+            byte[] bb=new byte[100];
+            int k=stm.Read(bb,0,100);
+
+            for (int i=0;i<k;i++)
+                Console.Write(Convert.ToChar(bb[i]));
+
+            tcpclnt.Close();
+        }
+
+        catch (Exception e) {
+            Console.WriteLine("Error..... " + e.StackTrace);
         }
     }
+
 }

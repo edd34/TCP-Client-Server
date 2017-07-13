@@ -1,69 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+/*   Server Program    */
 
-using System.Threading;
+using System;
+using System.Text;
 using System.Net;
 using System.Net.Sockets;
-using System.IO;
 
-namespace TCPServer
-{
-    class Program
-    {
-        static Socket client;
-        static NetworkStream netstream;
+public class serv {
+    public static void Main() {
 
-        [STAThread]
-        static void Main(string[] args)
-        {
-            Console.Title = "Server";
+        string hostName = Dns.GetHostName(); // Retrive the Name of HOST  
+        Console.WriteLine(hostName);  
+        // Get the IP  
+        string myIP = Dns.GetHostAddresses(hostName)[0].ToString();  
+        Console.WriteLine("My IP Address is :"+myIP);  
+        Console.ReadKey();  
 
+        try {
+            IPAddress ipAd = IPAddress.Parse(myIP);//Parse("172.21.5.99");
+            // use local m/c IP address, and 
+            // use the same in the client
 
-            IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
-            TcpListener tcpListener = new TcpListener(ipAddress, 8080);
-            tcpListener.Start();
-            Console.WriteLine("Server is running");
+            /* Initializes the Listener */
+            //TcpListener myList=new TcpListener(ipAd,8001);
+            TcpListener myList=new TcpListener(ipAd,8080);
+            /* Start Listeneting at the specified port */        
+            myList.Start();
 
-            try
-            {
-                while (true)
-                {
-                    client = tcpListener.AcceptSocket();
+            Console.WriteLine("The server is running at port 8001...");    
+            Console.WriteLine("The local End point is  :" + 
+                myList.LocalEndpoint );
+            Console.WriteLine("Waiting for a connection.....");
 
-                    if (client.Connected)
-                    {
-                        Console.WriteLine("Client connected " + client.RemoteEndPoint.ToString());
-                        Thread thread = new Thread(new ParameterizedThreadStart(listenClient));
-                        thread.Start(client);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
+            Socket s=myList.AcceptSocket();
+            Console.WriteLine("Connection accepted from " + s.RemoteEndPoint);
+
+            byte[] b=new byte[100];
+            int k=s.Receive(b);
+            Console.WriteLine("Recieved...");
+            for (int i=0;i<k;i++)
+                Console.Write(Convert.ToChar(b[i]));
+
+            ASCIIEncoding asen=new ASCIIEncoding();
+            s.Send(asen.GetBytes("The string was recieved by the server."));
+            Console.WriteLine("\nSent Acknowledgement");
+            /* clean up */            
+            s.Close();
+            myList.Stop();
 
         }
-
-        static void listenClient(object data)
-        {
-            while (client.Connected)
-            {
-                try
-                {
-                    client = (Socket)data;
-                    netstream = new NetworkStream(client);
-                    StreamWriter streamWriter = new StreamWriter(netstream); // to client
-                    StreamReader streamReader = new StreamReader(netstream); // from client
-                }
-                catch (Exception e)
-                {
-
-                }
-            }
-        }
+        catch (Exception e) {
+            Console.WriteLine("Error..... " + e.StackTrace);
+        }    
     }
+
 }
