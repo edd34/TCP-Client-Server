@@ -14,7 +14,7 @@ public class serv {
         // Get the IP  
         string myIP = Dns.GetHostAddresses(hostName)[0].ToString();  
         Console.WriteLine("My IP Address is :"+myIP);  
-        Console.ReadKey();  
+//        Console.ReadKey();  
 
         try {
             IPAddress ipAd = IPAddress.Parse(myIP);//Parse("172.21.5.99");
